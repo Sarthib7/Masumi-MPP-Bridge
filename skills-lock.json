@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "masumi": {
+      "source": "masumi-network/masumi-skills",
+      "sourceType": "github",
+      "computedHash": "5965553cc4a3a1c3419e4f5f61416b1b90dfa74fcf3b84af1c7905b0141dc7a6"
+    }
+  }
+}
