@@ -1,6 +1,6 @@
 # Masumi MPP Bridge — documentation
 
-The [root README](../README.md) covers **every topic in brief**; this folder adds **depth** (workflows, full diagrams, long troubleshooting).
+The [root README](../README.md) is a **short public abstract**; this folder has **full detail** (workflows, diagrams, setup, API, troubleshooting).
 
 | Document | What it covers |
 |----------|----------------|
