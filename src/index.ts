@@ -17,6 +17,12 @@ if (!config.masumi.paymentApiKey) {
   logger.warn('PAYMENT_API_KEY is empty — registry calls will fail until configured.');
 }
 
+if (config.tempo.stripeEnabled) {
+  logger.warn(
+    'STRIPE_ENABLED is set, but Stripe settlement is not implemented yet. The active external rail is still MPP over Tempo.',
+  );
+}
+
 const server = serve({ fetch: app.fetch, port }, (addr) => {
   const bound =
     addr && typeof addr === 'object' && 'port' in addr ? addr.port : port;

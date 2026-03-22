@@ -18,10 +18,11 @@ Details evolve with the payment service API; treat this section as intent — ve
 
 ## Adding more payment rails
 
-The proxy and session layers are meant to stay **payment-agnostic**. To add another rail (e.g. x402, Kairen):
+The proxy and session layers are meant to stay **payment-agnostic**. MPP is the first external rail plugin. To add another rail later (e.g. x402, Kairen):
 
-1. Add middleware under `src/middleware/` (e.g. `x402-gate.ts`).
-2. Detect the new protocol from headers or body in the main handler.
-3. Map the rail’s credential format to the bridge’s internal representation.
+1. Add a payment-rail adapter under `src/payments/`.
+2. Implement challenge and verification behavior for that rail.
+3. Map the rail’s credential format to the bridge’s internal receipt and session representation.
+4. Select that rail in the HTTP layer without changing the MIP-003 proxy contract.
 
 MIP-003 proxying and session mapping should not need structural changes for a new rail.

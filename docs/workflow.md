@@ -22,6 +22,8 @@ No Masumi API keys, Sokosumi keys, bridge API keys, or bridge `.env`.
 
 MPP settlement for your deployment lands at **`MPP_RECIPIENT`** until you add separate payout logic.
 
+Today, the active external rail is **MPP**. Longer term, the bridge is meant to expose multiple payment rails while keeping the same Masumi-facing MIP-003 flow behind them.
+
 ---
 
 ## End-to-end hire flow (hirer)
@@ -30,7 +32,7 @@ MPP settlement for your deployment lands at **`MPP_RECIPIENT`** until you add se
 2. **Schema** — `GET /agents/:id/input_schema` (no payment).
 3. **Start job** — `POST /agents/:id/start_job` with `input_data` (or equivalent per MIP-003). First response is **402 Payment Required** with an MPP challenge (`WWW-Authenticate: Payment …`).
 4. **Pay & retry** — MPP client (e.g. `npx mppx`) settles on Tempo and retries with `Authorization: Payment <credential>`.
-5. **Verify & proxy** — Bridge verifies the payment, maps the payer identity for Masumi, and proxies **MIP-003** to the agent’s real `apiBaseUrl`.
+5. **Verify & proxy** — Bridge verifies the payment through the active rail plugin, maps the payer identity for Masumi, and proxies **MIP-003** to the agent’s real `apiBaseUrl`.
 6. **Poll** — `GET /agents/:id/status/:jobId` until status is `completed` (or terminal failure).
 7. **Receipts (operator-side)** — On completion, the bridge can log a composite receipt hash to Masumi decision logging (see [Extensibility](extensibility.md)).
 
@@ -57,7 +59,7 @@ Optional paid path: `POST /agents/:id/provide_input/:jobId` for additional input
 3. Configure **Tempo**: `MPP_SECRET_KEY`, `MPP_RECIPIENT`, and related MPP env as in `.env.example`.
 4. `npm install`, copy `.env.example` → `.env`, edit secrets, `npm run dev` or `npm run build && npm start`.
 
-ADA/USD for MPP-facing prices is typically fetched from CoinGecko with TTL caching, with fallbacks if the oracle is disabled (see `src/config.ts` / `src/pricing/`).
+ADA/USD for MPP-facing prices is typically fetched from CoinGecko with TTL caching, with fallbacks if the oracle is disabled (see `src/config.ts` / `src/pricing/`). Future rails can use different pricing and settlement logic without changing the MIP-003 proxy layer.
 
 ---
 

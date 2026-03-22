@@ -4,7 +4,7 @@ import { buildAgentCatalog } from './catalog/build-catalog.js';
 import { config } from './config.js';
 import { registerHttpRoutes } from './http/routes.js';
 import { ReceiptLogger } from './logging/receipt-logger.js';
-import { createMppMiddleware } from './middleware/mpp-gate.js';
+import { createMppPaymentRail } from './payments/mpp-payment-rail.js';
 import { createMip003Proxy } from './proxy/mip003-proxy.js';
 import { SessionJobManager } from './sessions/session-job-manager.js';
 
@@ -20,7 +20,7 @@ export function createApp(): Hono {
   const sessionManager = new SessionJobManager();
   const receiptLogger = new ReceiptLogger(config.masumi);
   const mip003Proxy = createMip003Proxy(config.masumi);
-  const mppGate = createMppMiddleware(config.tempo);
+  const paymentRail = createMppPaymentRail(config.tempo);
 
   const app = new Hono();
   app.use(
@@ -38,7 +38,7 @@ export function createApp(): Hono {
     sessionManager,
     receiptLogger,
     mip003Proxy,
-    mppGate,
+    paymentRail,
     config,
   });
 

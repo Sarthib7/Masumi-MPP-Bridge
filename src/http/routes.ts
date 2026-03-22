@@ -6,11 +6,10 @@ import { adaOracleParams, resolveMppChargeUsd } from '../lib/pricing.js';
 import { derivePurchaserId, hashOutput } from '../lib/purchaser-id.js';
 import { getBridgeVersion } from '../lib/version.js';
 import type { ReceiptLogger } from '../logging/receipt-logger.js';
-import { createMppMiddleware } from '../middleware/mpp-gate.js';
+import type { PaymentRail } from '../payments/payment-rail.js';
 import { createMip003Proxy, type StartJobRequest } from '../proxy/mip003-proxy.js';
 import type { SessionJobManager } from '../sessions/session-job-manager.js';
 
-export type MppGate = ReturnType<typeof createMppMiddleware>;
 export type Mip003Proxy = ReturnType<typeof createMip003Proxy>;
 
 export interface HttpRouteDeps {
@@ -18,12 +17,12 @@ export interface HttpRouteDeps {
   sessionManager: SessionJobManager;
   receiptLogger: ReceiptLogger;
   mip003Proxy: Mip003Proxy;
-  mppGate: MppGate;
+  paymentRail: PaymentRail;
   config: Config;
 }
 
 export function registerHttpRoutes(app: Hono, deps: HttpRouteDeps): void {
-  const { catalog, sessionManager, receiptLogger, mip003Proxy, mppGate, config } = deps;
+  const { catalog, sessionManager, receiptLogger, mip003Proxy, paymentRail, config } = deps;
 
   app.get('/health', (c) =>
     c.json({
@@ -54,7 +53,8 @@ export function registerHttpRoutes(app: Hono, deps: HttpRouteDeps): void {
       return c.json({
         status: 'success',
         bridge: 'masumi-mpp-bridge',
-        payment_methods: ['tempo', 'stripe'],
+        payment_protocols: [paymentRail.metadata.protocol],
+        payment_methods: paymentRail.metadata.methods,
         agents: rows,
       });
     } catch (err) {
@@ -188,7 +188,7 @@ export function registerHttpRoutes(app: Hono, deps: HttpRouteDeps): void {
       body: bodyText,
     });
 
-    const mppResult = await mppGate.charge({
+    const mppResult = await paymentRail.charge({
       amount: usdAmount.toString(),
       metadata: {
         agent_id: agentId,
@@ -273,7 +273,7 @@ export function registerHttpRoutes(app: Hono, deps: HttpRouteDeps): void {
       body: bodyText,
     });
 
-    const mppResult = await mppGate.charge({
+    const mppResult = await paymentRail.charge({
       amount: incrementalCharge,
     })(mppRequest);
 
@@ -298,7 +298,7 @@ export function registerHttpRoutes(app: Hono, deps: HttpRouteDeps): void {
       name: 'Masumi MPP Bridge',
       version,
       description:
-        'Universal payment gateway for Masumi Network agents. Pay with MPP (Tempo/Stripe), hire any Masumi agent.',
+        'Masumi payment-rail bridge. Current external rail: MPP, with Tempo settlement today and more rails planned.',
       client_requirements: {
         bridge_url: 'this host (public HTTPS)',
         mpp_wallet: 'required for paid routes',
@@ -307,12 +307,9 @@ export function registerHttpRoutes(app: Hono, deps: HttpRouteDeps): void {
         bridge_env_file: 'not used by clients; operator-only on server',
       },
       protocol: 'MIP-003',
-      payment_protocols: ['mpp'],
-      payment_methods: ['tempo', 'stripe'],
-      settlement_chains: {
-        payment: 'tempo',
-        accountability: 'cardano',
-      },
+      payment_protocols: [paymentRail.metadata.protocol],
+      payment_methods: paymentRail.metadata.methods,
+      settlement_chains: paymentRail.metadata.settlementChains,
       endpoints: {
         health: 'GET /health',
         list_agents: 'GET /agents',

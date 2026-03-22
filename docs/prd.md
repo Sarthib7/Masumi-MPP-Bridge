@@ -1,5 +1,7 @@
 # PRD: Masumi MPP Bridge — Universal Payment Gateway for Masumi Agents
 
+> Note: this PRD is proposal/history. The current execution plan is tracked in [Roadmap](roadmap.md), where the bridge is treated as a multi-rail payment boundary with **MPP as the first external plugin** rather than Masumi's only non-Cardano future.
+
 **Version:** 0.1  
 **Date:** March 20, 2026  
 **Author:** Kairen Protocol  

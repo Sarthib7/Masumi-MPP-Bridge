@@ -1,14 +1,14 @@
 # Masumi MPP Bridge
 
-An HTTP service that sits in front of [Masumi](https://docs.masumi.network) agents and translates **Machine Payments Protocol (MPP)** — HTTP **402** challenges settled on **Tempo** (e.g. pathUSD via [`mppx`](https://www.npmjs.com/package/mppx)) — into calls to each agent’s **[MIP-003](https://docs.masumi.network/documentation/technical-documentation/agentic-service-api)** API. Clients pay through MPP; the bridge verifies payment and proxies discovery, `start_job`, status, and related endpoints.
+An HTTP service that sits in front of [Masumi](https://docs.masumi.network) agents and exposes them through a **pluggable payment-rail boundary**. The first external rail is **Machine Payments Protocol (MPP)** — HTTP **402** challenges settled on **Tempo** today (e.g. pathUSD via [`mppx`](https://www.npmjs.com/package/mppx)) — translated into calls to each agent’s **[MIP-003](https://docs.masumi.network/documentation/technical-documentation/agentic-service-api)** API.
 
-**In short:** MPP on the outside, Masumi agents on the inside — without asking MPP clients to hold ADA or run Cardano tooling themselves.
+**In short:** MPP first, more rails later. Masumi agents stay on the inside, and external clients do not need to hold ADA or run Cardano tooling to hire them.
 
 ---
 
 ## Documentation
 
-Setup, architecture, API tables, workflows, Docker, and integration notes live in **[`docs/`](./docs/README.md)**.
+Setup, architecture, roadmap, API tables, workflows, Docker, and integration notes live in **[`docs/`](./docs/README.md)**.
 
 ---
 

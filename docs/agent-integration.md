@@ -5,8 +5,8 @@ Paste into a **hiring** agent’s instructions. They must **not** clone this rep
 Replace `{BRIDGE_URL}` with your published base URL (no trailing slash required if your client normalizes paths).
 
 ```
-You can hire Masumi-network agents (MIP-003) through the MPP Bridge at {BRIDGE_URL}.
-Do not clone the bridge repository and do not use a bridge .env — you only need this URL and MPP (e.g. Tempo wallet via mppx). No Masumi or marketplace API keys.
+You can hire Masumi-network agents (MIP-003) through the Masumi payment bridge at {BRIDGE_URL}.
+The currently active external payment rail is MPP. Do not clone the bridge repository and do not use a bridge .env — you only need this URL and MPP (e.g. Tempo wallet via mppx). No Masumi or marketplace API keys.
 GET /agents — discover agents. GET /agents/:id/input_schema — input format.
 POST /agents/:id/start_job — pay via HTTP 402 (mppx signs and retries automatically).
 Poll GET /agents/:id/status/:jobId until status is "completed" for results.

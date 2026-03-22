@@ -1,11 +1,13 @@
 # Architecture
 
+For the diagram-first reference page, see [Visual architecture](visual-architecture.md).
+
 ## High-level diagram
 
 ```
 ┌──────────────────────┐
-│  External MPP Agent  │  ← Any agent with a Tempo wallet
-│  (mppx client SDK)   │     or other MPP client
+│ External Hiring Agent│  ← Any client that supports an active
+│   (MPP first today)  │     bridge payment rail
 └──────────┬───────────┘
            │ HTTP request
            ▼
@@ -13,8 +15,8 @@
 │         Masumi MPP Bridge                │
 │                                          │
 │  ┌─────────────┐  ┌──────────────────┐  │
-│  │ MPP Gate    │  │ Session Manager  │  │
-│  │ (402/verify)│  │ (MPP→job map)    │  │
+│  │ Payment Rail│  │ Session Manager  │  │
+│  │ Plugin      │  │ (payment→job map)│  │
 │  └──────┬──────┘  └────────┬─────────┘  │
 │         │                  │             │
 │  ┌──────▼──────────────────▼──────────┐ │
@@ -29,22 +31,37 @@
            │               │
            ▼               ▼
 ┌──────────────┐  ┌────────────────┐
-│ Masumi Agent │  │   Tempo L1     │
-│ (MIP-003)    │  │ (settlement)   │
+│ Masumi Agent │  │ External Rail  │
+│ (MIP-003)    │  │ Settlement     │
 │ on Cardano   │  └────────────────┘
 └──────────────┘
 ```
 
-## Goal: Sokosumi-listed agents, MPP on the outside
+## Goal: Masumi agents, multiple payment rails
 
-**Target picture:** Agents that pay with **Tempo / MPP** can treat **Sokosumi marketplace** agents as sub-agents. **Masumi** remains the spine: **MIP-003** on each agent, registry + payment service for identity and Cardano-native flows. Sokosumi is discovery and marketplace UX.
+**Target picture:** Masumi should not depend on Cardano as the only payment entry point. **Masumi** remains the spine: **MIP-003** on each agent, registry + payment service for identity and Cardano-native flows. The bridge adds **external payment rail plugins** in front of that spine. **MPP is the first plugin**, with Tempo settlement today. Sokosumi remains discovery and marketplace UX.
 
 | Layer | Role |
 |--------|------|
-| **Client** | Pays with MPP; talks only to **this bridge**. |
-| **This bridge** | HTTP 402 + MPP verify, then **proxy MIP-003** to the agent URL. |
+| **Client** | Pays using an active bridge payment rail; today that means MPP. |
+| **This bridge** | Resolves the active payment rail, verifies payment, then **proxies MIP-003** to the agent URL. |
 | **Masumi** | [MIP-003 Agentic Service API](https://docs.masumi.network/documentation/technical-documentation/agentic-service-api), payment/registry node. Native A2A: [Enable agent collaboration](https://docs.masumi.network/documentation/how-to-guides/how-to-enable-agent-collaboration). |
 | **Sokosumi** | Marketplace; agents still Masumi-registered + MIP-003. Public API: `GET /agents` on `https://api.sokosumi.com/v1` — [Sokosumi API reference](https://docs.sokosumi.com/api-reference). Coworker API keys ≠ `PAYMENT_API_KEY` on the Masumi node. |
+
+## Payment rail model
+
+The bridge is intentionally split into:
+
+- **Payment rail plugin**: challenge/verify/receipt behavior for a specific payment protocol.
+- **Proxy layer**: MIP-003 passthrough to Masumi agents.
+- **Session layer**: maps paid requests to jobs.
+- **Receipt logging**: optional cross-chain accountability on Cardano.
+
+Current state:
+
+- **Masumi native Cardano flow** remains supported as passthrough when `identifier_from_purchaser` is supplied.
+- **MPP** is the first external plugin and is the only external rail implemented in this repo today.
+- **Tempo** is the current settlement method behind that MPP plugin, not the long-term product boundary.
 
 ## Agent catalog (`AGENT_CATALOG`)
 
